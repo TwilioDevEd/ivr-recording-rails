@@ -12,4 +12,12 @@ Rails.application.routes.draw do
   # callback for planet entry
   match 'ivr/planets' => 'twilio#planet_selection', via: [:get, :post], as: 'planets'
 
+  # callback for agent
+  match 'ivr/screen_call' => 'twilio#screen_call', via: [:get, :post]
+
+  # callback for agent entry
+  match 'ivr/agent_screen' => 'twilio#agent_screen', via: [:get, :post]
+
+  # callback for agent voicemail
+  match 'ivr/agent_voicemail' => 'twilio#agent_voicemail', via: [:get, :post]
 end

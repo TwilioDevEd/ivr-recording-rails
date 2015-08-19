@@ -58,7 +58,7 @@ class TwilioController < ApplicationController
 
     case user_selection
     when "2"
-      twiml_dial(ENV['PLANET1_NUMBER'])
+      connect_to_planet("Brodo")
     when "3"
       twiml_dial(ENV['PLANET2_NUMBER'])
     when "4"
@@ -67,6 +67,75 @@ class TwilioController < ApplicationController
       @output = "Returning to the main menu."
       twiml_say(@output)
     end
+  end
+
+  def connect_to_planet(agent)
+    response = Twilio::TwiML::Response.new do |r|
+      r.Dial action: "/ivr/agent_voicemail" do |d|
+        d.Number "+12066505813", url: "/ivr/screen_call"
+      end
+    end
+
+    render text: response.text
+  end
+
+  # POST ivr/screen_call
+  def screen_call
+    @customer_phone_number = params[:From]
+
+    response = Twilio::TwiML::Response.new do |r|
+      # will return status 'completed' if digits are entered
+      r.Gather numDigits: '1', action: '/ivr/agent_screen' do |g|
+        g.Say "You have an incoming call from an Alien with phone number
+        #{@customer_phone_number}."
+        g.Say "Press any key to accept."
+      end
+      
+      # will return status no-answer since this is a Number callback
+      r.Say "Sorry, I didn't get your response."
+      r.Hangup
+    end
+    render text: response.text
+  end
+
+  # POST ivr/agent_screen
+  def agent_screen
+    agent_selected = params[:Digits]
+
+    if agent_selected == "1"
+      response = Twilio::TwiML::Response.new do |r|
+        r.Say "Connecting you to the E.T. in distress. All calls are recorded."
+      end
+    else
+      response = Twilio::TwiML::Response.new do |r|
+        r.Say "Alien caller will be sent to voicemail."
+        r.Hangup
+      end
+    end
+
+    render text: response.text
+  end
+
+  # POST ivr/agent_voicemail
+  def agent_voicemail
+    status = params[:DialCallStatus] || "completed"
+    recording = params[:RecordingUrl]
+
+    # If the call to the agent was not successful, and there is no recording,
+    # then record a voicemail
+    if (status != "completed" || recording.nil? )
+      response = Twilio::TwiML::Response.new do |r|
+        r.Say "It appears that planet is unavailable. Please leave a message after the beep.", voice: 'alice', language: 'en-GB'
+        r.Record finishOnKey: "*", transcribe: true, maxLength: '20'
+        r.Say "I did not receive a recording.", voice: 'alice', language: 'en-GB'
+      end
+    # otherwise end the call
+    else
+      response = Twilio::TwiML::Response.new do |r|
+        r.Hangup
+      end
+    end
+    render text: response.text
   end
 
   private
