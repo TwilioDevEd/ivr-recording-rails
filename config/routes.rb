@@ -3,6 +3,10 @@ Rails.application.routes.draw do
   # Root of the app
   root 'twilio#index'
 
+  # Recordings
+  get 'recordings/:agent' => 'recordings#show', as: 'recordings'
+  post 'recordings/create' => 'recordings#create', as: 'new_recording'
+
   # webhook for your Twilio number
   match 'ivr/welcome' => 'twilio#ivr_welcome', via: [:get, :post], as: 'welcome'
 

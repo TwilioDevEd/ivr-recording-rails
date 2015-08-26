@@ -44,7 +44,7 @@ class TwilioController < ApplicationController
     go back to the main menu, press the star key."
 
     response = Twilio::TwiML::Response.new do |r|
-      r.Gather numDigits: '1', action: '/ivr/planets' do |g|
+      r.Gather numDigits: '1', action: planets_path do |g|
         g.Say message, voice: 'alice', language: 'en-GB', loop:3
       end
     end
@@ -58,21 +58,23 @@ class TwilioController < ApplicationController
 
     case user_selection
     when "2"
-      connect_to_planet("Brodo")
+      connect_to_extension("Brodo")
     when "3"
-      twiml_dial(ENV['PLANET2_NUMBER'])
+      connect_to_extension("Dugobah")
     when "4"
-      twiml_dial(ENV['PLANET3_NUMBER'])
+      connect_to_extension("113")
     else
       @output = "Returning to the main menu."
       twiml_say(@output)
     end
   end
 
-  def connect_to_planet(agent)
+  def connect_to_extension(extension)
+    @agent = Agent.find_by(extension: extension)
+
     response = Twilio::TwiML::Response.new do |r|
-      r.Dial action: "/ivr/agent_voicemail" do |d|
-        d.Number "+12066505813", url: "/ivr/screen_call"
+      r.Dial action: "/ivr/agent_voicemail?agent_id=#{@agent.id}" do |d|
+        d.Number @agent.phone_number, url: "/ivr/screen_call"
       end
     end
 
@@ -85,12 +87,12 @@ class TwilioController < ApplicationController
 
     response = Twilio::TwiML::Response.new do |r|
       # will return status 'completed' if digits are entered
-      r.Gather numDigits: '1', action: '/ivr/agent_screen' do |g|
+      r.Gather numDigits: '1', action: '/ivr/agent_screen_response' do |g|
         g.Say "You have an incoming call from an Alien with phone number
         #{@customer_phone_number}."
         g.Say "Press any key to accept."
       end
-      
+
       # will return status no-answer since this is a Number callback
       r.Say "Sorry, I didn't get your response."
       r.Hangup
@@ -99,17 +101,12 @@ class TwilioController < ApplicationController
   end
 
   # POST ivr/agent_screen
-  def agent_screen
+  def agent_screen_response
     agent_selected = params[:Digits]
 
-    if agent_selected == "1"
+    if agent_selected
       response = Twilio::TwiML::Response.new do |r|
         r.Say "Connecting you to the E.T. in distress. All calls are recorded."
-      end
-    else
-      response = Twilio::TwiML::Response.new do |r|
-        r.Say "Alien caller will be sent to voicemail."
-        r.Hangup
       end
     end
 
@@ -126,7 +123,7 @@ class TwilioController < ApplicationController
     if (status != "completed" || recording.nil? )
       response = Twilio::TwiML::Response.new do |r|
         r.Say "It appears that planet is unavailable. Please leave a message after the beep.", voice: 'alice', language: 'en-GB'
-        r.Record finishOnKey: "*", transcribe: true, maxLength: '20'
+        r.Record finishOnKey: "*", transcribe: true, maxLength: '20', transcribeCallback: "/recordings/create?agent_id=#{params[:agent_id]}"
         r.Say "I did not receive a recording.", voice: 'alice', language: 'en-GB'
       end
     # otherwise end the call

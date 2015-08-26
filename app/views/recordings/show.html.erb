@@ -1,0 +1,34 @@
+<% content_for :hero do %>
+  <div class="hero-text">
+    <h1>Lodging fit for a captain</h1>
+    <p>The Next Generation of vacation rentals.</p>
+  </div>
+<% end %>
+<p id="notice"><%= notice %></p>
+<div class="container">
+  <div class="row">
+    <% if @recordings.empty? %>
+      <h2> You have no recordings. </h2>
+    <% else %>
+      <h2> Your current reservations as a Host. </h2>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Recording</th>
+            <th>Message</th>
+            <th>Phone Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recordings.each do |recording| %>
+            <tr>
+              <th scope="row"><audio controls="controls" src="<%= recording['url'] %>" preload="auto" /></th>
+              <td><%= recording['transcription'] %></td>
+              <td><%= recording['phone_number'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
