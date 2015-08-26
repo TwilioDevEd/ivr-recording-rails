@@ -1,8 +1,9 @@
 require 'test_helper'
 
 class TwilioControllerTest < ActionController::TestCase
-  setup do
-    # Put setup steps here
+  # called before every single test
+  def setup
+    @agent = agents(:one)
   end
 
   test "should get index" do
@@ -34,10 +35,17 @@ class TwilioControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test "/planets should Play something then Hangup when 2 is chosen" do
+  test "/planets should Dial an outside extension" do
     get :planet_selection, From: "15556505813", Digits: '2'
-    assert response.body.include? "Play"
-    assert response.body.include? "Hangup"
+    assert response.body.include? "Dial"
+    assert response.body.include? "Number"
+    assert_response :success
+  end
+
+  test "agent_voicemail should Say something then Record the caller" do
+    post :agent_voicemail, From: "15556505813", DialCallStatus: "completed"
+    assert response.body.include? "Say"
+    assert response.body.include? "Record"
     assert_response :success
   end
 

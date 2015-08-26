@@ -1,11 +1,9 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  extension: MyString
-  phone_number: MyString
-  recording_id: 
+  extension: Brodo
+  phone_number: 5551111111
 
 two:
-  extension: MyString
-  phone_number: MyString
-  recording_id: 
+  extension: Dugobah
+  phone_number: 5552222222
