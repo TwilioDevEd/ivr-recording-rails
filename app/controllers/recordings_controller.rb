@@ -4,7 +4,7 @@ class RecordingsController < ApplicationController
 
   # GET /recordings/:agent
   def show
-    @agent_number = params[:agent] || "4695186234"
+    @agent_number = params[:agent]
     @agent = Agent.find_by(phone_number: @agent_number)
     @recordings = @agent.recordings 
   end

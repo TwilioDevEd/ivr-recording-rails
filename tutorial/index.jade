@@ -1,0 +1,135 @@
+.chapter(data-title='IVR Phone Tree')
+  .step(data-file='config/routes.rb')
+    :markdown
+      ## About this application
+
+      ![Extra Terrestrial Phone Home
+      Service](http://howtodocs.s3.amazonaws.com/logo-et-phone2.png)
+
+      This [Ruby on Rails](http://rubyonrails.org/) sample application is
+      modeled after a typical call center experience, but with more [Reese's
+      Pieces](https://en.wikipedia.org/wiki/Reese%27s_Pieces#ET:_The_Extra-
+      Terrestrial).
+
+      Stranded aliens can call a phone number and receive instructions on how
+      to get out of earth safely, or call their home planet
+      directly[.](http://bit.ly/asogi) In this tutorial, we'll show you the
+      key bits of code that allow an agent to send a caller to voicemail, and
+      later read transcripts and listen to voicemails.
+
+      To run this sample app yourself, [download the code and follow the
+      instructions on GitHub](https://github.com/TwilioDevEd/ivr-phone-tree-
+      rails).
+
+      Let's get started! Click the right arrow above to move to the next step
+      of the tutorial.
+
+      ---
+
+      **See Also:**
+      * [ET IVR Part One: Phone Trees](https://www.twilio.com/docs/howto/walkthrough/ivr-phone-tree/ruby/rails#0)
+      * [Getting Started with Ruby on Rails](http://guides.rubyonrails.org/getting_started.html)
+      * [Getting started with the Twilio Ruby gem](//twilio-ruby.readthedocs.org/en/latest/index.html#getting-started)
+
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='55-82')
+    :markdown
+      ## Route the call to an agent
+
+      When our caller chooses a planet we need to figure out where to route the call. Depending on her input we will route this call to an extension. In this case an extension will be used to look up an Agent, so any string can be used to define an extension. 
+
+      Once we lookup the `Agent` we can `Dial` the agent's phone number and try and connect the call. Let's dive in a little bit more into how we lookup the Agent.
+
+      ---
+
+      **See Also:**
+      * [TwiML response with the twilio-ruby library](https://www.twilio.com/docs/quickstart/ruby/twiml)
+      * [TwiML Dial]([`Dial`](https://www.twilio.com/docs/api/twiml/dial)
+      
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='73')
+    :markdown
+      ## Looking up an Agent
+
+      In this case the Agent model is very simple:
+
+      ```
+      create_table :agents do |t|
+        t.string :extension
+        t.string :phone_number
+
+        t.timestamps
+      end
+      ```
+
+      We have a handle or `extension` that we can use to lookup and Agent, and we have a `phone_number` that we will call.
+
+      ---
+
+      **See Also:**
+      * [Looking up an ActiveRecord object](http://guides.rubyonrails.org/active_record_querying.html#retrieving-a-single-object)
+
+
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='77, 84-101')
+    :markdown
+      ## An agent screens the call
+
+      By passing a `url` to the `Dial` > [`Number`](https://www.twilio.com/docs/api/twiml/number) TwiML tag, we are telling Twilio to make a request (POST) to the url _after_ the agent has picked up but _before_ connecting the two parties. 
+
+      Essentially we are telling Twilio to execute some TwiML that only the agent will hear. In this case the TwiML instructs the agent to press any number to accept the call. This is processed through the [Gather](https://www.twilio.com/docs/api/twiml/gather) callback.
+
+      ---
+
+      **See Also:**
+      * [TwiML Say verb](https://www.twilio.com/docs/api/twiml/say)
+
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='76-78, 103-114')
+    :markdown
+      ## Connect the Caller to the Agent
+
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='76,116-136')
+    :markdown
+      ## Send the Caller to Voicemail
+
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='126')
+    :markdown
+      ## Record the Caller
+
+  .step(data-file='app/controllers/recordings_controller.rb')
+    :markdown
+      ## View an Agent's Voicemails
+
+  .step
+    :markdown
+      ## Where to next?
+
+      That's it! We've just implemented an IVR with real Agents, call
+      screening and voicemail. If you're a Ruby developer working with Twilio,
+      you might want to check out these other tutorials.
+
+      [**Part 1 of this Tutorial: ET Phone Home Service - IVR Phone
+      Trees**](//www.twilio.com/docs/howto/walkthrough/ivr-phone-
+      tree/ruby/rails#0)
+
+      Increase your rate of response by automating the workflows that are key
+      to your business.
+
+      [**Appointment
+      Reminders**](https://www.twilio.com/docs/howto/walkthrough/appointment-
+      reminders/ruby/rails)
+
+      Send your customers a text message when they have an upcoming
+      appointment - this tutorial shows you how to do it from a background
+      job.
+
+      ### Did this help?
+
+      Thanks for checking out this tutorial! If you have any feedback to share
+      with us, we'd love to hear it. Tweet
+      [@twilio](http://twitter.com/twilio) to let us know what you think.
+
+
+
+
+
+
+
+
