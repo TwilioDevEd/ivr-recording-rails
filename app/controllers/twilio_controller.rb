@@ -100,7 +100,7 @@ class TwilioController < ApplicationController
     render text: response.text
   end
 
-  # POST ivr/agent_screen
+  # POST ivr/agent_screen_response
   def agent_screen_response
     agent_selected = params[:Digits]
 
@@ -123,7 +123,7 @@ class TwilioController < ApplicationController
     if (status != "completed" || recording.nil? )
       response = Twilio::TwiML::Response.new do |r|
         r.Say "It appears that planet is unavailable. Please leave a message after the beep.", voice: 'alice', language: 'en-GB'
-        r.Record finishOnKey: "*", transcribe: true, maxLength: '20', transcribeCallback: "/recordings/create?agent_id=#{params[:agent_id]}"
+        r.Record maxLength: '20', transcribe: true, transcribeCallback: "/recordings/create?agent_id=#{params[:agent_id]}"
         r.Say "I did not receive a recording.", voice: 'alice', language: 'en-GB'
       end
     # otherwise end the call
