@@ -21,6 +21,12 @@ git clone git://github.com/TwilioDevEd/ivr-phone-tree-rails.git
 bundle install
 </pre>
 
+On 64 bit versions of OS X, you may need to install with the following to allow the pg gem to install:
+
+```bash
+ARCHFLAGS="-arch x86_64" bundle install
+```
+
 3) Make sure the tests succeed
 <pre>
 rake test
