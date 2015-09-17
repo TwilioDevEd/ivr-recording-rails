@@ -10,12 +10,12 @@ class TwilioController < ApplicationController
 
   # POST ivr/welcome
   def ivr_welcome
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       r.Gather numDigits: '1', action: menu_path do |g|
         g.Play "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3
       end
     end
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   # GET ivr/selection
@@ -43,13 +43,13 @@ class TwilioController < ApplicationController
     DuhGo bah, press 3. To call an oober asteroid to your location, press 4. To
     go back to the main menu, press the star key."
 
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       r.Gather numDigits: '1', action: planets_path do |g|
         g.Say message, voice: 'alice', language: 'en-GB', loop:3
       end
     end
 
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   # POST/GET ivr/planets
@@ -72,20 +72,20 @@ class TwilioController < ApplicationController
   def connect_to_extension(extension)
     @agent = Agent.find_by(extension: extension)
 
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       r.Dial action: "/ivr/agent_voicemail?agent_id=#{@agent.id}" do |d|
         d.Number @agent.phone_number, url: "/ivr/screen_call"
       end
     end
 
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   # POST ivr/screen_call
   def screen_call
     @customer_phone_number = params[:From]
 
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       # will return status 'completed' if digits are entered
       r.Gather numDigits: '1', action: '/ivr/agent_screen_response' do |g|
         g.Say "You have an incoming call from an Alien with phone number
@@ -97,7 +97,7 @@ class TwilioController < ApplicationController
       r.Say "Sorry, I didn't get your response."
       r.Hangup
     end
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   # POST ivr/agent_screen
@@ -105,12 +105,12 @@ class TwilioController < ApplicationController
     agent_selected = params[:Digits]
 
     if agent_selected
-      response = Twilio::TwiML::Response.new do |r|
+      twiml = Twilio::TwiML::Response.new do |r|
         r.Say "Connecting you to the E.T. in distress. All calls are recorded."
       end
     end
 
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   # POST ivr/agent_voicemail
@@ -121,18 +121,18 @@ class TwilioController < ApplicationController
     # If the call to the agent was not successful, and there is no recording,
     # then record a voicemail
     if (status != "completed" || recording.nil? )
-      response = Twilio::TwiML::Response.new do |r|
+      twiml = Twilio::TwiML::Response.new do |r|
         r.Say "It appears that planet is unavailable. Please leave a message after the beep.", voice: 'alice', language: 'en-GB'
         r.Record finishOnKey: "*", transcribe: true, maxLength: '20', transcribeCallback: "/recordings/create?agent_id=#{params[:agent_id]}"
         r.Say "I did not receive a recording.", voice: 'alice', language: 'en-GB'
       end
     # otherwise end the call
     else
-      response = Twilio::TwiML::Response.new do |r|
+      twiml = Twilio::TwiML::Response.new do |r|
         r.Hangup
       end
     end
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   private
@@ -140,7 +140,7 @@ class TwilioController < ApplicationController
   def twiml_say(phrase, exit = false)
     # Respond with some TwiML and say something.
     # Should we hangup or go back to the main menu?
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       r.Say phrase, voice: 'alice', language: 'en-GB'
       if exit 
         r.Say "Thank you for calling the ET Phone Home Service - the
@@ -151,14 +151,14 @@ class TwilioController < ApplicationController
       end
     end
 
-    render text: response.text
+    render xml: twiml.to_xml
   end
 
   def twiml_dial(phone_number)
-    response = Twilio::TwiML::Response.new do |r|
+    twiml = Twilio::TwiML::Response.new do |r|
       r.Dial phone_number
     end
 
-    render text: response.text
+    render xml: twiml.to_xml
   end
 end
