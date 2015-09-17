@@ -18,8 +18,7 @@
       later read transcripts and listen to voicemails.
 
       To run this sample app yourself, [download the code and follow the
-      instructions on GitHub](https://github.com/TwilioDevEd/ivr-phone-tree-
-      rails).
+      instructions on GitHub](https://github.com/TwilioDevEd/ivr-recording-rails).
 
       Let's get started! Click the right arrow above to move to the next step
       of the tutorial.
@@ -35,15 +34,20 @@
     :markdown
       ## Route the call to an agent
 
-      When our caller chooses a planet we need to figure out where to route the call. Depending on her input we will route this call to an extension. In this case an extension will be used to look up an Agent, so any string can be used to define an extension. 
+      When our caller chooses a planet we need to figure out where to route the
+      call. Depending on her input we will route this call to an extension. In
+      this case an extension will be used to look up an Agent, so any string
+      can be used to define an extension. 
 
-      Once we lookup the `Agent` we can `Dial` the agent's phone number and try and connect the call. Let's dive in a little bit more into how we lookup the Agent.
+      Once we lookup the `Agent` we can `Dial` the agent's phone number and try
+      and connect the call. Let's dive in a little bit more into how we lookup
+      the Agent.
 
       ---
 
       **See Also:**
       * [TwiML response with the twilio-ruby library](https://www.twilio.com/docs/quickstart/ruby/twiml)
-      * [TwiML Dial]([`Dial`](https://www.twilio.com/docs/api/twiml/dial)
+      * [TwiML Dial](https://www.twilio.com/docs/api/twiml/dial)
       
   .step(data-file='app/controllers/twilio_controller.rb', data-highlight='73')
     :markdown
@@ -60,7 +64,8 @@
       end
       ```
 
-      We have a handle or `extension` that we can use to lookup and Agent, and we have a `phone_number` that we will call.
+      We have a handle or `extension` that we can use to lookup and Agent, and
+      we have a `phone_number` that we will call.
 
       ---
 
@@ -68,39 +73,58 @@
       * [Looking up an ActiveRecord object](http://guides.rubyonrails.org/active_record_querying.html#retrieving-a-single-object)
 
 
-  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='77, 84-101')
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='76-78, 84-101')
     :markdown
       ## An agent screens the call
 
-      By passing a `url` to the `Dial` > [`Number`](https://www.twilio.com/docs/api/twiml/number) TwiML tag, we are telling Twilio to make a request (POST) to the url _after_ the agent has picked up but _before_ connecting the two parties. 
+      By passing a `url` to the `Dial` > [`Number`](https://www.twilio.com/docs/api/twiml/number)
+      TwiML tag, we are telling Twilio to make a POST request to the
+      `/ivr/screen_call` URL _after_ the agent has picked up but _before_
+      connecting the two parties. 
 
-      Essentially we are telling Twilio to execute some TwiML that only the agent will hear. In this case the TwiML instructs the agent to press any number to accept the call. This is processed through the [Gather](https://www.twilio.com/docs/api/twiml/gather) callback.
+      Essentially we are telling Twilio to execute some TwiML that only the
+      agent will hear. In this case the TwiML instructs the agent to press any
+      number to accept the call. This is processed through the
+      [Gather](https://www.twilio.com/docs/api/twiml/gather) callback.
 
       ---
 
       **See Also:**
       * [TwiML Say verb](https://www.twilio.com/docs/api/twiml/say)
 
-  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='76-78, 103-114')
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='103-114, 76-78')
     :markdown
       ## Connect the Caller to the Agent
 
-      If the agent responds to the call screen by entering any digit the response will be processed by our `agent_screen_response` method which will `Say` a quick message, then continue with the original `Dial` command and connect the two parties. 
+      If the agent responds to the call screen by entering any digit the
+      response will be processed by our `agent_screen_response` method which
+      will `Say` a quick message, then continue with the original `Dial` command
+      and connect the two parties. 
 
-      If the agent instead does not respond, the Dial verb will end by making a POST request to its [`action`](https://www.twilio.com/docs/api/twiml/dial#attributes-action) url.
+      If the agent instead does not respond, the Dial verb will end by making a
+      POST request to its
+      [`action`](https://www.twilio.com/docs/api/twiml/dial#attributes-action)
+      url which we defined above.
 
       ---
 
       **See Also:**
       * [The Gather action attribute](https://www.twilio.com/docs/api/twiml/gather#attributes-action)
 
-  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='76,116-136')
+  .step(data-file='app/controllers/twilio_controller.rb', data-highlight='116-136')
     :markdown
       ## Send the Caller to Voicemail
 
-      When Twilio makes a request to our voicemail controller, it will pass a [`DialCallStatus`](https://www.twilio.com/docs/api/twiml/dial#attributes-action-dial-call-status-values) which will tell us if the call was successful. If it was "completed" we hangup-- otherwise we need to `Say` a quick prompt and then [`Record`](https://www.twilio.com/docs/api/twiml/record) a voicemail from the caller. 
+      When Twilio makes a request to our voicemail controller, it will pass a
+      [`DialCallStatus`](https://www.twilio.com/docs/api/twiml/dial#attributes-action-dial-call-status-values)
+      which will tell us if the call was successful. If it was "completed" we
+      hangup — otherwise we need to `Say` a quick prompt and then
+      [`Record`](https://www.twilio.com/docs/api/twiml/record) a voicemail from
+      the caller. 
 
-      Since we didn't pass an action to `Record`, Twilio will request this same route when the recording completes. In that case we also want to hang up if a recording is present.
+      Since we didn't pass an action to `Record`, Twilio will request this same
+      route when the recording completes. In that case we also want to hang up
+      if a recording is present.
 
       ---
 
@@ -114,11 +138,18 @@
     :markdown
       ## Record the Caller
 
-      When we tell Twilio to Record we have a few [options](https://www.twilio.com/docs/api/twiml/record#attributes) we can pass to the `Record` verb. 
+      When we tell Twilio to Record we have a few
+      [options](https://www.twilio.com/docs/api/twiml/record#attributes) we can
+      pass to the `Record` verb. 
 
-      Here we are instructing Record to stop the recording at 20 seconds, to [`transcribe`](https://www.twilio.com/docs/api/twiml/record#attributes-transcribe) the call, and where to send the transcription when it's complete.
+      Here we instruct Record to stop the recording at 20 seconds, to
+      [`transcribe`](https://www.twilio.com/docs/api/twiml/record#attributes-transcribe)
+      the call, and where to send the transcription when it's complete.
 
-      Notice we append some query parameters at the end of the transcribe callback. This is a convenient way to pass application variables along with the TwiML request parameters. By passing the `:agent_id` we now have a way to save a `Recording` on that `Agent` object.
+      Notice we append some query parameters at the end of the transcribe
+      callback. This is a convenient way to pass application variables along
+      with the TwiML request parameters. By passing the `:agent_id` we now have
+      a way to save a `Recording` on that `Agent` object.
 
       ---
 
@@ -130,9 +161,14 @@
     :markdown
       ## View an Agent's Voicemails
 
-      Once we look up the Agent, all we need to do is display all of her recordings. If you'd like to dig deeper into the recording object feel free to check it out on [github](https://github.com/TwilioDevEd/ivr-recording-rails/blob/master/db/schema.rb).
+      Once we look up the Agent, all we need to do is display all of her
+      recordings. If you'd like to dig deeper into the recording object feel
+      free to check it out on
+      [GitHub](https://github.com/TwilioDevEd/ivr-recording-rails/blob/master/db/schema.rb).
 
-      It is possible to look-up recordings via the Twilio REST API, but since we have all of the data we need in the `transcribeCallBack` we can easily store it ourselves and save a roundtrip.
+      It is possible to look up recordings via the Twilio REST API, but since
+      we have all of the data we need in the `transcribeCallBack` we can easily
+      store it ourselves and save a roundtrip.
 
       ---
 
