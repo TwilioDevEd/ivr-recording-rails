@@ -1,9 +1,7 @@
 require 'twilio-ruby'
 require 'sanitize'
 
-
 class TwilioController < ApplicationController
-  
   def index
     render text: "Dial Me."
   end
@@ -24,16 +22,16 @@ class TwilioController < ApplicationController
 
     case user_selection
     when "1"
-      @output = "To get to your extraction point, get on your bike and go down
+      output = "To get to your extraction point, get on your bike and go down
         the street. Then Left down an alley. Avoid the police cars. Turn left
         into an unfinished housing development. Fly over the roadblock. Go
         passed the moon. Soon after you will see your mother ship."
-      twiml_say(@output, true)
+      twiml_say(output, true)
     when "2"
       list_planets
     else
-      @output = "Returning to the main menu."
-      twiml_say(@output)
+      output = "Returning to the main menu."
+      twiml_say(output)
     end
 
   end
@@ -64,17 +62,17 @@ class TwilioController < ApplicationController
     when "4"
       connect_to_extension("113")
     else
-      @output = "Returning to the main menu."
-      twiml_say(@output)
+      output = "Returning to the main menu."
+      twiml_say(output)
     end
   end
 
   def connect_to_extension(extension)
-    @agent = Agent.find_by(extension: extension)
+    agent = Agent.find_by(extension: extension)
 
     twiml = Twilio::TwiML::Response.new do |r|
-      r.Dial action: "/ivr/agent_voicemail?agent_id=#{@agent.id}" do |d|
-        d.Number @agent.phone_number, url: "/ivr/screen_call"
+      r.Dial action: "/ivr/agent_voicemail?agent_id=#{agent.id}" do |d|
+        d.Number agent.phone_number, url: "/ivr/screen_call"
       end
     end
 
@@ -83,13 +81,13 @@ class TwilioController < ApplicationController
 
   # POST ivr/screen_call
   def screen_call
-    @customer_phone_number = params[:From]
+    customer_phone_number = params[:From]
 
     twiml = Twilio::TwiML::Response.new do |r|
       # will return status 'completed' if digits are entered
       r.Gather numDigits: '1', action: '/ivr/agent_screen_response' do |g|
         g.Say "You have an incoming call from an Alien with phone number
-        #{@customer_phone_number}."
+        #{customer_phone_number}."
         g.Say "Press any key to accept."
       end
 
