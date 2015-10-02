@@ -1,6 +1,3 @@
-require 'twilio-ruby'
-require 'sanitize'
-
 class TwilioController < ApplicationController
   def index
     render text: "Dial Me."
@@ -13,6 +10,7 @@ class TwilioController < ApplicationController
         g.Play "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3
       end
     end
+
     render xml: twiml.to_xml
   end
 
@@ -33,21 +31,6 @@ class TwilioController < ApplicationController
       output = "Returning to the main menu."
       twiml_say(output)
     end
-
-  end
-
-  def list_planets
-    message = "To call the planet Broh doe As O G, press 2. To call the planet
-    DuhGo bah, press 3. To call an oober asteroid to your location, press 4. To
-    go back to the main menu, press the star key."
-
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Gather numDigits: '1', action: planets_path do |g|
-        g.Say message, voice: 'alice', language: 'en-GB', loop:3
-      end
-    end
-
-    render xml: twiml.to_xml
   end
 
   # POST/GET ivr/planets
@@ -67,27 +50,15 @@ class TwilioController < ApplicationController
     end
   end
 
-  def connect_to_extension(extension)
-    agent = Agent.find_by(extension: extension)
-
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Dial action: "/ivr/agent_voicemail?agent_id=#{agent.id}" do |d|
-        d.Number agent.phone_number, url: "/ivr/screen_call"
-      end
-    end
-
-    render xml: twiml.to_xml
-  end
-
   # POST ivr/screen_call
   def screen_call
     customer_phone_number = params[:From]
 
     twiml = Twilio::TwiML::Response.new do |r|
       # will return status 'completed' if digits are entered
-      r.Gather numDigits: '1', action: '/ivr/agent_screen_response' do |g|
+      r.Gather numDigits: '1', action: ivr_agent_screen_path do |g|
         g.Say "You have an incoming call from an Alien with phone number
-        #{customer_phone_number}."
+        #{customer_phone_number.chars.join(",")}."
         g.Say "Press any key to accept."
       end
 
@@ -99,7 +70,7 @@ class TwilioController < ApplicationController
   end
 
   # POST ivr/agent_screen
-  def agent_screen_response
+  def agent_screen
     agent_selected = params[:Digits]
 
     if agent_selected
@@ -116,7 +87,7 @@ class TwilioController < ApplicationController
     status = params[:DialCallStatus] || "completed"
     recording = params[:RecordingUrl]
 
-    # If the call to the agent was not successful, and there is no recording,
+    # If the call to the agent was not successful, or there is no recording,
     # then record a voicemail
     if (status != "completed" || recording.nil? )
       twiml = Twilio::TwiML::Response.new do |r|
@@ -130,6 +101,7 @@ class TwilioController < ApplicationController
         r.Hangup
       end
     end
+
     render xml: twiml.to_xml
   end
 
@@ -155,6 +127,32 @@ class TwilioController < ApplicationController
   def twiml_dial(phone_number)
     twiml = Twilio::TwiML::Response.new do |r|
       r.Dial phone_number
+    end
+
+    render xml: twiml.to_xml
+  end
+
+  def list_planets
+    message = "To call the planet Broh doe As O G, press 2. To call the planet
+    DuhGo bah, press 3. To call an oober asteroid to your location, press 4. To
+    go back to the main menu, press the star key."
+
+    twiml = Twilio::TwiML::Response.new do |r|
+      r.Gather numDigits: '1', action: planets_path do |g|
+        g.Say message, voice: 'alice', language: 'en-GB', loop: 3
+      end
+    end
+
+    render xml: twiml.to_xml
+  end
+
+  def connect_to_extension(extension)
+    agent = Agent.find_by(extension: extension)
+
+    twiml = Twilio::TwiML::Response.new do |r|
+      r.Dial action: ivr_agent_voicemail_path(agent_id: agent.id) do |d|
+        d.Number agent.phone_number, url: ivr_screen_call_path
+      end
     end
 
     render xml: twiml.to_xml

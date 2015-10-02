@@ -12,7 +12,7 @@ class TwilioControllerTest < ActionController::TestCase
   end
 
   test "should serve up TwiMl at ivr/welcome" do
-    post :ivr_welcome, :From => "15556505813"
+    post :ivr_welcome, From: "15556505813"
     assert response.body.include? "Gather"
     assert_response :success
   end
@@ -48,5 +48,4 @@ class TwilioControllerTest < ActionController::TestCase
     assert response.body.include? "Record"
     assert_response :success
   end
-
 end
