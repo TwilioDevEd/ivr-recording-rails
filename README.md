@@ -1,11 +1,7 @@
 # IVR Call Recording and Agent Conference. Level: Intermediate. Powered by Twilio - Ruby on Rails
 
 An example application implementing an automated phone line using Twilio.  For a
-step-by-step tutorial, [visit this link](https://twilio.com/docs/howto/).
-
-Deploy this example app to Heroku now!
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/TwilioDevEd/ivr-phone-tree-rails)
+step-by-step tutorial, [visit this link](https://www.twilio.com/docs/howto/walkthrough/ivr-screening/ruby/rails).
 
 ### Local Development
 
