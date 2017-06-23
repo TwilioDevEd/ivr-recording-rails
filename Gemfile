@@ -12,7 +12,7 @@ gem 'pg'
 gem 'activerecord-session_store'
 
 # Twilio helper library
-gem 'twilio-ruby', '~> 5.0.0.rc17'
+gem 'twilio-ruby', '~> 5.0.0.rc24'
 # Use sanitize
 gem 'sanitize'
 # Use jquery as the JavaScript library

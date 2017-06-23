@@ -5,13 +5,12 @@ class TwilioController < ApplicationController
 
   # POST ivr/welcome
   def ivr_welcome
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Gather numDigits: '1', action: menu_path do |g|
-        g.Play "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3
-      end
-    end
+    response = Twilio::TwiML::VoiceResponse.new
+    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: menu_path)
+    gather.play(url: "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3)
+    response.append(gather)
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   # GET ivr/selection
@@ -54,19 +53,18 @@ class TwilioController < ApplicationController
   def screen_call
     customer_phone_number = params[:From]
 
-    twiml = Twilio::TwiML::Response.new do |r|
-      # will return status 'completed' if digits are entered
-      r.Gather numDigits: '1', action: ivr_agent_screen_path do |g|
-        g.Say "You have an incoming call from an Alien with phone number
-        #{customer_phone_number.chars.join(",")}."
-        g.Say "Press any key to accept."
-      end
+    response = Twilio::TwiML::VoiceResponse.new
+    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: ivr_agent_screen_path)
+    gather.say("You have an incoming call from an Alien with phone number
+    #{customer_phone_number.chars.join(",")}.")
+    gather.say("Press any key to accept.")
 
-      # will return status no-answer since this is a Number callback
-      r.Say "Sorry, I didn't get your response."
-      r.Hangup
-    end
-    render xml: twiml.to_xml
+    # will return status no-answer since this is a Number callback
+    response.say("Sorry, I didn't get your response.")
+    response.hangup
+    response.append(gather)
+
+    render xml: response.to_xml_str
   end
 
   # POST ivr/agent_screen
@@ -74,12 +72,11 @@ class TwilioController < ApplicationController
     agent_selected = params[:Digits]
 
     if agent_selected
-      twiml = Twilio::TwiML::Response.new do |r|
-        r.Say "Connecting you to the E.T. in distress. All calls are recorded."
-      end
+      response = Twilio::TwiML::VoiceResponse.new
+      response.say("Connecting you to the E.T. in distress. All calls are recorded.")
     end
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   # POST ivr/agent_voicemail
@@ -90,19 +87,19 @@ class TwilioController < ApplicationController
     # If the call to the agent was not successful, or there is no recording,
     # then record a voicemail
     if (status != "completed" || recording.nil? )
-      twiml = Twilio::TwiML::Response.new do |r|
-        r.Say "It appears that planet is unavailable. Please leave a message after the beep.", voice: 'alice', language: 'en-GB'
-        r.Record finishOnKey: "*", transcribe: true, maxLength: '20', transcribeCallback: "/recordings/create?agent_id=#{params[:agent_id]}"
-        r.Say "I did not receive a recording.", voice: 'alice', language: 'en-GB'
-      end
+      response = Twilio::TwiML::VoiceResponse.new
+      response.say("It appears that planet is unavailable. Please leave a message after the beep.",
+          voice: 'alice', language: 'en-GB')
+      response.record(finish_on_key: "*", transcribe: true, max_length: '20',
+          transcribe_callback: "/recordings/create?agent_id=#{params[:agent_id]}")
+      response.say("I did not receive a recording.", voice: 'alice', language: 'en-GB')
     # otherwise end the call
     else
-      twiml = Twilio::TwiML::Response.new do |r|
-        r.Hangup
-      end
+      response = Twilio::TwiML::VoiceResponse.new
+      response.hangup
     end
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   private
@@ -110,26 +107,24 @@ class TwilioController < ApplicationController
   def twiml_say(phrase, exit = false)
     # Respond with some TwiML and say something.
     # Should we hangup or go back to the main menu?
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Say phrase, voice: 'alice', language: 'en-GB'
-      if exit 
-        r.Say "Thank you for calling the ET Phone Home Service - the
-        adventurous alien's first choice in intergalactic travel."
-        r.Hangup
-      else
-        r.Redirect welcome_path
-      end
+    response = Twilio::TwiML::VoiceResponse.new
+    response.say(phrase, voice: 'alice', language: 'en-GB')
+    if exit
+      response.say("Thank you for calling the ET Phone Home Service - the
+      adventurous alien's first choice in intergalactic travel.")
+      response.hangup
+    else
+      response.redirect(welcome_path)
     end
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   def twiml_dial(phone_number)
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Dial phone_number
-    end
+    response = Twilio::TwiML::VoiceResponse.new
+    response.dial(phone_number)
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   def list_planets
@@ -137,24 +132,22 @@ class TwilioController < ApplicationController
     DuhGo bah, press 3. To call an oober asteroid to your location, press 4. To
     go back to the main menu, press the star key."
 
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Gather numDigits: '1', action: planets_path do |g|
-        g.Say message, voice: 'alice', language: 'en-GB', loop: 3
-      end
-    end
+    response = Twilio::TwiML::VoiceResponse.new
+    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: planets_path)
+    gather.say(message, voice: 'alice', language: 'en-GB', loop: 3)
+    response.append(gather)
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 
   def connect_to_extension(extension)
     agent = Agent.find_by(extension: extension)
 
-    twiml = Twilio::TwiML::Response.new do |r|
-      r.Dial action: ivr_agent_voicemail_path(agent_id: agent.id) do |d|
-        d.Number agent.phone_number, url: ivr_screen_call_path
-      end
-    end
+    response = Twilio::TwiML::VoiceResponse.new
+    dial = Twilio::TwiML::Dial.new(action: ivr_agent_voicemail_path(agent_id: agent.id))
+    dial.number(agent.phone_number, url: ivr_screen_call_path)
+    response.append(dial)
 
-    render xml: twiml.to_xml
+    render xml: response.to_xml_str
   end
 end
