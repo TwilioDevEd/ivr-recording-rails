@@ -11,6 +11,7 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'pg'
 gem 'activerecord-session_store'
 
+gem 'sqlite3'
 # Twilio helper library
 gem 'twilio-ruby', '~> 5.0.0.rc24'
 # Use sanitize
