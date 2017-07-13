@@ -10,7 +10,7 @@ class TwilioController < ApplicationController
     gather.play(url: "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3)
     response.append(gather)
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   # GET ivr/selection
@@ -64,7 +64,7 @@ class TwilioController < ApplicationController
     response.hangup
     response.append(gather)
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   # POST ivr/agent_screen
@@ -76,7 +76,7 @@ class TwilioController < ApplicationController
       response.say("Connecting you to the E.T. in distress. All calls are recorded.")
     end
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   # POST ivr/agent_voicemail
@@ -99,7 +99,7 @@ class TwilioController < ApplicationController
       response.hangup
     end
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   private
@@ -117,14 +117,14 @@ class TwilioController < ApplicationController
       response.redirect(welcome_path)
     end
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   def twiml_dial(phone_number)
     response = Twilio::TwiML::VoiceResponse.new
     response.dial(phone_number)
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   def list_planets
@@ -137,7 +137,7 @@ class TwilioController < ApplicationController
     gather.say(message, voice: 'alice', language: 'en-GB', loop: 3)
     response.append(gather)
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 
   def connect_to_extension(extension)
@@ -148,6 +148,6 @@ class TwilioController < ApplicationController
     dial.number(agent.phone_number, url: ivr_screen_call_path)
     response.append(dial)
 
-    render xml: response.to_xml_str
+    render xml: response.to_s
   end
 end
