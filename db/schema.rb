@@ -13,9 +13,6 @@
 
 ActiveRecord::Schema.define(version: 20150824173135) do
 
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
-
   create_table "agents", force: true do |t|
     t.string   "extension"
     t.string   "phone_number"
@@ -32,6 +29,6 @@ ActiveRecord::Schema.define(version: 20150824173135) do
     t.datetime "updated_at"
   end
 
-  add_index "recordings", ["agent_id"], name: "index_recordings_on_agent_id", using: :btree
+  add_index "recordings", ["agent_id"], name: "index_recordings_on_agent_id"
 
 end

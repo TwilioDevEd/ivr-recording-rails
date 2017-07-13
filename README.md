@@ -1,64 +1,82 @@
+<a href="https://www.twilio.com">
+  <img src="https://static0.twilio.com/marketing/bundles/marketing/img/logos/wordmark-red.svg" alt="Twilio" width="250" />
+</a>
+
 # IVR Call Recording and Agent Conference. Level: Intermediate. Powered by Twilio - Ruby on Rails
 
-An example application implementing an automated phone line using Twilio.  For a
-step-by-step tutorial, [visit this link](https://www.twilio.com/docs/howto/walkthrough/ivr-screening/ruby/rails).
+[![Build Status](https://travis-ci.org/TwilioDevEd/ivr-recording-rails.svg?branch=master)](https://travis-ci.org/TwilioDevEd/ivr-recording-rails)
 
-### Local Development
+IVRs (interactive voice response) are automated phone systems that can
+facilitate communication between callers and businesses. In this tutorial you
+will learn how to screen and send callers to voicemail if an agent is busy.
 
-To run this locally on your machine:
+[Read the full tutorial here!](https://www.twilio.com/docs/howto/walkthrough/ivr-screening/ruby/rails).
 
-1) Grab latest source
-<pre>
-git clone git://github.com/TwilioDevEd/ivr-recording-rails.git 
-</pre>
+## Local Development
 
-2) Navigate to folder and run
-<pre>
-bundle install
-</pre>
+This project is built using [Ruby on Rails](http://rubyonrails.org/) Framework.
 
-On 64 bit versions of OS X, you may need to install with the following to allow the pg gem to install:
+To run this locally on your machine.
 
-```bash
-ARCHFLAGS="-arch x86_64" bundle install
-```
-3) Create the Database
-<pre>
-rake db:create db:migrate
-</pre>
+1. First clone this repository and `cd` into it.
 
-4) Edit db/seeds.rb & seed the database
-<pre>
-rake db:seed
-</pre>
+   ```bash
+   $ git clone git@github.com:TwilioDevEd/ivr-recording-rails.git
+   $ cd ivr-recording-rails
+   ```
 
-3) Make sure the tests succeed
-<pre>
-rake test
-</pre>
+1. Install the dependencies.
 
-4) Run the server
-<pre>
-rails server
-</pre>
+   ```bash
+   $ bundle install
+   ```
 
-7) Check it out at [localhost:3000/](http://localhost:3000/)
+1. Create the database and run migrations.
 
-### Configure Twilio to call your webhooks
+   Make sure you have installed [PostgreSQL](http://www.postgresql.org/). If on
+   a Mac, I recommend [Postgres.app](http://postgresapp.com).
 
-You will also need to configure Twilio to call your application when calls are received
+   ```bash
+   $ bundle exec rake db:setup
+   ```
 
-You will need to provision at least one Twilio number with voice capabilities
-so the application's users can take surveys. You can buy a number [right
-here](https://www.twilio.com/user/account/phone-numbers/search). Once you have
-a number you need to configure your number to work with your application. Open
-[the number management page](https://www.twilio.com/user/account/phone-
-numbers/incoming) and open a number's configuration by clicking on it.
+1. Edit db/seeds.rb and seed the database.
 
-![Configure Voice](http://howtodocs.s3.amazonaws.com/twilio-number-config-all-med.gif)
+   ```bash
+   $ bundle exec rake db:seed
+   ```
 
-## Meta 
+1. Make sure the tests succeed.
 
-* No warranty expressed or implied.  Software is as is. Diggity.
+   ```bash
+   $ bundle exec rake test
+   ```
+
+1. Start the server.
+
+   ```bash
+   $ bundle exec rails s
+   ```
+
+1. Check it out at [http://localhost:3000](http://localhost:3000).
+
+## How to Demo
+
+1. Expose the application to the wider Internet using [ngrok](https://ngrok.com/).
+
+   ```bash
+   $ ngrok http 3000
+   ```
+
+1. Provision a number with voice capabilities under the
+   [Manage Numbers page](https://www.twilio.com/console/phone-numbers/incoming)
+   on your account. Set the *Voice URL* for the number to
+   `http://<your-ngrok-subdomain>.ngrok.io/ivr/welcome`.
+
+1. Grab your phone and call your newly-provisioned number!
+
+## Meta
+
+* No warranty expressed or implied. Software is as is. Diggity.
 * [MIT License](http://www.opensource.org/licenses/mit-license.html)
 * Lovingly crafted by Twilio Developer Education.

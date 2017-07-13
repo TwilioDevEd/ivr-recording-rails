@@ -10,8 +10,10 @@ gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'pg'
 gem 'activerecord-session_store'
-# Twilio REST API. 
-gem 'twilio-ruby'
+
+gem 'sqlite3'
+# Twilio helper library
+gem 'twilio-ruby', '~> 5.0.0'
 # Use sanitize
 gem 'sanitize'
 # Use jquery as the JavaScript library

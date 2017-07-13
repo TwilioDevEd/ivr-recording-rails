@@ -14,3 +14,7 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+.env
+.ruby-version
+ivr-rails_development
+ivr-rails_test
