@@ -7,7 +7,7 @@ class TwilioController < ApplicationController
   def ivr_welcome
     response = Twilio::TwiML::VoiceResponse.new
     gather = Twilio::TwiML::Gather.new(num_digits: '1', action: menu_path)
-    gather.play(url: "http://howtodocs.s3.amazonaws.com/et-phone.mp3", loop: 3)
+    gather.play(url: "https://can-tasty-8188.twil.io/assets/et-phone.mp3", loop: 3)
     response.append(gather)
 
     render xml: response.to_s
