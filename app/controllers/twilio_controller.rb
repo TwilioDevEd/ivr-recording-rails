@@ -1,14 +1,14 @@
 class TwilioController < ApplicationController
   def index
-    render text: "Dial Me."
+    render plain: "Dial Me."
   end
 
   # POST ivr/welcome
   def ivr_welcome
     response = Twilio::TwiML::VoiceResponse.new
-    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: menu_path)
-    gather.play(url: "https://can-tasty-8188.twil.io/assets/et-phone.mp3", loop: 3)
-    response.append(gather)
+    response.gather(num_digits: '1', action: menu_path) do |gather|
+      gather.play(url: "https://can-tasty-8188.twil.io/assets/et-phone.mp3", loop: 3)
+    end
 
     render xml: response.to_s
   end
@@ -54,15 +54,15 @@ class TwilioController < ApplicationController
     customer_phone_number = params[:From]
 
     response = Twilio::TwiML::VoiceResponse.new
-    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: ivr_agent_screen_path)
-    gather.say("You have an incoming call from an Alien with phone number
-    #{customer_phone_number.chars.join(",")}.")
-    gather.say("Press any key to accept.")
+    response.gather(num_digits: '1', action: ivr_agent_screen_path) do |gather|
+      gather.say(message: "You have an incoming call from an Alien with phone number
+      #{customer_phone_number.chars.join(",")}.")
+      gather.say("Press any key to accept.")
+    end
 
     # will return status no-answer since this is a Number callback
-    response.say("Sorry, I didn't get your response.")
+    response.say(message: "Sorry, I didn't get your response.")
     response.hangup
-    response.append(gather)
 
     render xml: response.to_s
   end
@@ -73,7 +73,7 @@ class TwilioController < ApplicationController
 
     if agent_selected
       response = Twilio::TwiML::VoiceResponse.new
-      response.say("Connecting you to the E.T. in distress. All calls are recorded.")
+      response.say(message: "Connecting you to the E.T. in distress. All calls are recorded.")
     end
 
     render xml: response.to_s
@@ -88,11 +88,11 @@ class TwilioController < ApplicationController
     # then record a voicemail
     if (status != "completed" || recording.nil? )
       response = Twilio::TwiML::VoiceResponse.new
-      response.say("It appears that planet is unavailable. Please leave a message after the beep.",
+      response.say(message: "It appears that planet is unavailable. Please leave a message after the beep.",
           voice: 'alice', language: 'en-GB')
       response.record(finish_on_key: "*", transcribe: true, max_length: '20',
           transcribe_callback: "/recordings/create?agent_id=#{params[:agent_id]}")
-      response.say("I did not receive a recording.", voice: 'alice', language: 'en-GB')
+      response.say(message: "I did not receive a recording.", voice: 'alice', language: 'en-GB')
     # otherwise end the call
     else
       response = Twilio::TwiML::VoiceResponse.new
@@ -108,9 +108,9 @@ class TwilioController < ApplicationController
     # Respond with some TwiML and say something.
     # Should we hangup or go back to the main menu?
     response = Twilio::TwiML::VoiceResponse.new
-    response.say(phrase, voice: 'alice', language: 'en-GB')
+    response.say(message: phrase, voice: 'alice', language: 'en-GB')
     if exit
-      response.say("Thank you for calling the ET Phone Home Service - the
+      response.say(message: "Thank you for calling the ET Phone Home Service - the
       adventurous alien's first choice in intergalactic travel.")
       response.hangup
     else
@@ -133,9 +133,9 @@ class TwilioController < ApplicationController
     go back to the main menu, press the star key."
 
     response = Twilio::TwiML::VoiceResponse.new
-    gather = Twilio::TwiML::Gather.new(num_digits: '1', action: planets_path)
-    gather.say(message, voice: 'alice', language: 'en-GB', loop: 3)
-    response.append(gather)
+    response.gather(num_digits: '1', action: planets_path) do |gather|
+      gather.say(message: message, voice: 'alice', language: 'en-GB', loop: 3)
+    end
 
     render xml: response.to_s
   end
@@ -144,9 +144,9 @@ class TwilioController < ApplicationController
     agent = Agent.find_by(extension: extension)
 
     response = Twilio::TwiML::VoiceResponse.new
-    dial = Twilio::TwiML::Dial.new(action: ivr_agent_voicemail_path(agent_id: agent.id))
-    dial.number(agent.phone_number, url: ivr_screen_call_path)
-    response.append(dial)
+    response.dial(action: ivr_agent_voicemail_path(agent_id: agent.id)) do |dial|
+      dial.number(agent.phone_number, url: ivr_screen_call_path)
+    end
 
     render xml: response.to_s
   end

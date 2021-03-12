@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20150824173135) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "agents", force: true do |t|
     t.string   "extension"
     t.string   "phone_number"

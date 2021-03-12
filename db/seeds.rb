@@ -3,5 +3,5 @@
 #
 # Examples:
 #
-  agents = Agent.create([{ extension: 'Brodo', phone_number: "+15552483591" }, { extension: 'Dugobah', phone_number: "+15558675309" }, { extension: '113', phone_number: "+15553185602" }])
+agents = Agent.create([{ extension: 'Brodo', phone_number: "+15552483591" }, { extension: 'Dugobah', phone_number: "+15558675309" }, { extension: '113', phone_number: "+15553185602" }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
