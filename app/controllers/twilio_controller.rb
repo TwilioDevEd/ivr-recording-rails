@@ -89,10 +89,10 @@ class TwilioController < ApplicationController
     if (status != "completed" || recording.nil? )
       response = Twilio::TwiML::VoiceResponse.new
       response.say(message: "It appears that planet is unavailable. Please leave a message after the beep.",
-          voice: 'alice', language: 'en-GB')
+          voice: 'Polly.Amy', language: 'en-GB')
       response.record(finish_on_key: "*", transcribe: true, max_length: '20',
           transcribe_callback: "/recordings/create?agent_id=#{params[:agent_id]}")
-      response.say(message: "I did not receive a recording.", voice: 'alice', language: 'en-GB')
+      response.say(message: "I did not receive a recording.", voice: 'Polly.Amy', language: 'en-GB')
     # otherwise end the call
     else
       response = Twilio::TwiML::VoiceResponse.new
@@ -108,7 +108,7 @@ class TwilioController < ApplicationController
     # Respond with some TwiML and say something.
     # Should we hangup or go back to the main menu?
     response = Twilio::TwiML::VoiceResponse.new
-    response.say(message: phrase, voice: 'alice', language: 'en-GB')
+    response.say(message: phrase, voice: 'Polly.Amy', language: 'en-GB')
     if exit
       response.say(message: "Thank you for calling the ET Phone Home Service - the
       adventurous alien's first choice in intergalactic travel.")
@@ -134,7 +134,7 @@ class TwilioController < ApplicationController
 
     response = Twilio::TwiML::VoiceResponse.new
     response.gather(num_digits: '1', action: planets_path) do |gather|
-      gather.say(message: message, voice: 'alice', language: 'en-GB', loop: 3)
+      gather.say(message: message, voice: 'Polly.Amy', language: 'en-GB', loop: 3)
     end
 
     render xml: response.to_s
